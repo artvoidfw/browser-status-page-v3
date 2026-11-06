@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CosmicTab v3 - Browser Status Page</title>
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="theme-cyan">
+
+  <canvas id="spaceCanvas"></canvas>
+
+  <div id="customBgLayer"></div>
+  <div id="customBgDimmer"></div>
+
+  <div id="appWrapper">
+
+    <header id="topBar">
+      <div class="top-left-group">
+        <div class="search-box-wrapper">
+          <button id="searchEngineBtn" class="solid-button" type="button" title="Axtarış mühərriki seçin">
+            <span id="currentEngineIcon">🌐</span>
+            <span id="currentEngineName">Google</span>
+            <svg width="12" height="12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+
+          <div id="engineDropdown">
+            <button type="button" data-engine="google" class="engine-opt"><span>🌐</span> Google</button>
+            <button type="button" data-engine="brave" class="engine-opt"><span>🦁</span> Brave</button>
+            <button type="button" data-engine="duckduckgo" class="engine-opt"><span>🦆</span> DuckDuckGo</button>
+            <button type="button" data-engine="chatgpt" class="engine-opt"><span>🤖</span> ChatGPT</button>
+            <button type="button" data-engine="perplexity" class="engine-opt"><span>🔮</span> Perplexity</button>
+            <button type="button" data-engine="github" class="engine-opt"><span>🐙</span> GitHub</button>
+            <button type="button" data-engine="youtube" class="engine-opt"><span>📺</span> YouTube</button>
+            <button type="button" data-engine="reddit" class="engine-opt"><span>👽</span> Reddit</button>
+            <button type="button" data-engine="wikipedia" class="engine-opt"><span>📚</span> Wikipedia</button>
+          </div>
+
+          <form id="searchForm">
+            <input 
+              type="text" 
+              id="searchInput" 
+              placeholder="Axtar və ya URL daxil et... (/)" 
+              autocomplete="off"
+              spellcheck="false"
+            >
+          </form>
+        </div>
+
+        <button id="addShortcutHeaderBtn" class="solid-button" style="width: 38px; height: 38px;" type="button" title="Yeni Qısayol əlavə et">
+          <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+        </button>
+      </div>
+
+      <div class="top-right-group">
+        <a 
+          id="portfolioBtn" 
+          href="https://artvoid.vercel.app/" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          title="Artvoid Portfolio"
+        >
+          <img src="icons/portfolio.jpg" alt="Artvoid" onerror="this.src='icons/icon48.png'">
+          <span>Portfolio</span>
+        </a>
+
+        <div id="weatherPill" class="solid-pill status-pill" title="Hava məlumatını yenilə">
+          <span id="weatherIcon">⛅</span>
+          <span id="weatherTemp" class="font-mono">--°C</span>
+          <span id="weatherCity" style="color: var(--text-secondary);">Bakı</span>
+        </div>
+
+        <button id="zenBtn" class="solid-button" style="width: 38px; height: 38px;" type="button" title="Fokus Rejimi (Zen / 'F')">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+        </button>
+
+        <button id="todoToggleBtn" class="solid-button" style="width: 38px; height: 38px; position: relative;" type="button" title="Günün Hədəfləri & Qeydlər">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+          <span id="todoBadge" style="display: none; position: absolute; top: -4px; right: -4px; width: 17px; height: 17px; background-color: var(--accent); color: var(--accent-text); font-size: 10px; font-weight: 700; border-radius: 50%; align-items: center; justify-content: center;">0</span>
+        </button>
+
+        <button id="fullscreenBtn" class="solid-button" style="width: 38px; height: 38px;" type="button" title="Tam Ekran Rejimi">
+          <svg width="15" height="15" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-5h-4m4 0v4m0-4l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"/></svg>
+        </button>
+
+        <button id="settingsBtn" class="solid-button" style="width: 38px; height: 38px;" type="button" title="Tənzimləmələr">
+          <svg width="16" height="16" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <main id="mainContent">
+      <div id="cosmicHudContainer">
+
+        <div id="orbitalFrame">
+          <div class="orbit-ring-1"><div class="planet-1"></div></div>
+          <div class="orbit-ring-2"><div class="planet-2"></div></div>
+          <div class="orbit-ring-3"><div class="planet-3"></div></div>
+
+          <div class="orbit-tick-north"></div>
+          <div class="orbit-tick-south"></div>
+          <div class="orbit-tick-east"></div>
+          <div class="orbit-tick-west"></div>
+
+          <div id="cosmicCore" title="12/24 saat formatını dəyişmək üçün klikləyin">
+            <div class="clock-main-display">
+              <span id="clockHoursMinutes" class="font-mono">00:00</span>
+              <div class="clock-sub-col">
+                <span id="clockSeconds" class="font-mono">00</span>
+                <span id="clockAmPm"></span>
+              </div>
+            </div>
+
+            <div class="telemetry-indicator-row font-mono">
+              <span id="clockTimezoneBadge" class="telemetry-badge">UTC+4</span>
+            </div>
+          </div>
+        </div>
+
+        <div id="quoteContainer">
+          <p id="quoteText">"Xarici hadisələrə deyil, yalnız öz fikirlərinə hökm edə bilərsən. Bunu anlasan, sarsılmaz güc tapacaqsan."</p>
+          <p id="quoteAuthor" class="font-mono">— Markus Avreli</p>
+        </div>
+
+      </div>
+
+      <div id="shortcutsContainer">
+        <div id="shortcutsGrid"></div>
+      </div>
+    </main>
+
+    <div id="zenExitBar">
+      <button id="zenExitBtn" type="button">
+        👁️ <span id="zenExitText">Fokus Rejimindən Çıx (və ya 'Esc')</span>
+      </button>
+    </div>
+
+    <footer id="bottomBar">
+      <div class="bottom-left-group">
+        <button id="randomQuoteBtn" class="solid-button" style="padding: 0.35rem 0.75rem; font-size: 0.72rem; gap: 0.35rem;" type="button" title="Yeni Stoisizm fikri gətir">
+          <span>🏛️</span>
+          <span id="randomQuoteBtnLabel">Stoisizm</span>
+        </button>
+      </div>
+
+      <div class="bottom-right-group">
+        <span id="timeZoneInfo" class="font-mono solid-pill" style="padding: 0.35rem 0.65rem; border-radius: 8px; font-size: 0.7rem;">Asia/Baku</span>
+
+        <a 
+          id="userGithubLink" 
+          href="https://github.com/artvoidfw" 
+          target="_blank" 
+          rel="noopener noreferrer" 
+          title="artvoidfw GitHub Profili"
+        >
+          <svg width="14" height="14" fill="currentColor" viewBox="0 0 24 24">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+          <span>artvoidfw</span>
+        </a>
+      </div>
+    </footer>
+
+  </div>
+
+  <aside id="todoDrawer">
+    <div class="drawer-header">
+      <div class="drawer-title">
+        <span>🎯</span>
+        <h3 id="todoDrawerTitle">Günün Hədəfləri & Qeydlər</h3>
+      </div>
+      <button id="closeTodoDrawer" class="drawer-close-btn" type="button">✕</button>
+    </div>
+
+    <div class="todo-input-bar">
+      <input type="text" id="newTodoInput" placeholder="Yeni hədəf yazın...">
+      <button id="addTodoBtn" type="button" title="Əlavə et">+</button>
+    </div>
+
+    <div id="todoList"></div>
+
+    <div class="notes-section">
+      <div class="notes-header">
+        <span id="scratchpadTitle">📝 Tez Qeydlər</span>
+        <span id="noteSavedStatus" class="font-mono" style="font-size: 0.65rem; color: var(--text-muted);">Yadda saxlanıldı ✓</span>
+      </div>
+      <textarea id="scratchpadArea" placeholder="Günün ideyaları, kod fraqmentləri və ya qeydlər..."></textarea>
+    </div>
+  </aside>
+
+  <div id="shortcutModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 id="shortcutModalTitle" class="modal-title">Yeni Qısayol Əlavə Et</h3>
+        <button id="closeShortcutModal" class="drawer-close-btn" type="button">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label" for="modalShortcutTitle">Saytın Adı</label>
+          <input type="text" id="modalShortcutTitle" class="form-input" placeholder="məsələn: GitHub">
+        </div>
+
+        <div class="form-group">
+          <label class="form-label" for="modalShortcutUrl">URL Ünvanı</label>
+          <input type="text" id="modalShortcutUrl" class="form-input" placeholder="https://github.com və ya github.com">
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <button id="cancelShortcutModal" class="btn-secondary" type="button">Ləğv et</button>
+        <button id="saveShortcutModal" class="btn-primary" type="button">Yadda Saxla</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="settingsModal" class="modal-overlay hidden">
+    <div class="modal-box">
+      <div class="modal-header">
+        <div class="modal-title">
+          <span>⚙️</span>
+          <h3 id="settingsHeading">Tənzimləmələr</h3>
+        </div>
+        <button id="closeSettingsModal" class="drawer-close-btn" type="button">✕</button>
+      </div>
+
+      <div class="modal-body">
+
+        <div class="form-group">
+          <label class="form-label">
+            <span>🖼️ Xüsusi Fon Şəkli və ya GIF</span>
+            <span style="font-size: 0.68rem; color: var(--accent);">JPG, PNG, WebP, GIF</span>
+          </label>
+          
+          <div class="bg-options-box">
+            <input type="text" id="bgUrlInput" class="form-input" placeholder="Şəkil və ya GIF URL-i daxil edin...">
+            
+            <div style="display: flex; gap: 0.5rem; align-items: center;">
+              <label for="bgFileInput" class="btn-secondary" style="flex: 1; display: flex; align-items: center; justify-content: center; gap: 0.4rem; height: 34px; font-size: 0.75rem; cursor: pointer;">
+                <span>📁 Fayl Seç (Kompüterdən)</span>
+              </label>
+              <input type="file" id="bgFileInput" accept="image/*" style="display: none;">
+              
+              <button type="button" id="clearBgBtn" class="btn-secondary" style="height: 34px; font-size: 0.75rem; color: var(--danger);" title="Fon şəklini sil">
+                Təmizlə
+              </button>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 0.35rem;">
+              <span style="font-size: 0.68rem; color: var(--text-muted);">Sürətli Kosmik Nümunələr:</span>
+              <div class="bg-presets-grid">
+                <button type="button" class="preset-bg-btn" data-bg="https://images.unsplash.com/photo-1506703719100-a0f3a48c0f86?q=80&w=1920">🌌 Dərin Kosmos</button>
+                <button type="button" class="preset-bg-btn" data-bg="https://images.unsplash.com/photo-1451187580459-43490279c0fa?q=80&w=1920">🌍 Yer Orbiti</button>
+                <button type="button" class="preset-bg-btn" data-bg="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?q=80&w=1920">✨ Qalaktika</button>
+                <button type="button" class="preset-bg-btn" data-bg="none">⬛ Təmiz Qara</button>
+              </div>
+            </div>
+
+            <div class="slider-container">
+              <span style="font-size: 0.72rem; color: var(--text-secondary); white-space: nowrap;">Qaraltma dərəcəsi:</span>
+              <input type="range" id="bgDimmerSlider" class="range-slider" min="0" max="90" value="40">
+              <span id="bgDimmerVal" class="font-mono" style="font-size: 0.72rem; color: var(--accent); width: 32px;">40%</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.35rem;">
+            <label class="form-label" style="margin: 0;" for="orbitSpeedSlider">🪐 Orbit Fırlanma Sürəti</label>
+            <span id="orbitSpeedVal" class="font-mono" style="font-size: 0.72rem; color: var(--accent);">1.0x</span>
+          </div>
+          <div class="slider-container">
+            <span style="font-size: 0.68rem; color: var(--text-muted);">Sakit</span>
+            <input type="range" id="orbitSpeedSlider" class="range-slider" min="0.2" max="3" step="0.1" value="1">
+            <span style="font-size: 0.68rem; color: var(--text-muted);">Sürətli</span>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label id="lblCountryLang" class="form-label">
+            <span>🌍 Ölkə, Dil və Saat Qurşağı</span>
+            <span style="font-size: 0.68rem; color: var(--accent);">16 Ölkə</span>
+          </label>
+
+          <button type="button" id="countryDropdownBtn" class="country-select-btn">
+            <div style="display: flex; align-items: center; gap: 0.5rem;">
+              <span id="countryCurrentFlag" style="font-size: 1.1rem;">🇦🇿</span>
+              <span id="countryCurrentName" style="font-weight: 600;">Azərbaycan</span>
+              <span id="countryCurrentUtc" class="font-mono telemetry-badge">UTC+4</span>
+            </div>
+            <svg id="countryChevron" width="14" height="14" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"/></svg>
+          </button>
+
+          <div id="countryDropdownMenu" class="country-dropdown-list" style="display: none;"></div>
+          <p id="countryTimezoneHint" class="font-mono" style="font-size: 0.68rem; color: var(--text-muted); margin-top: 0.2rem;">Saat qurşağı: Asia/Baku (UTC+4)</p>
+        </div>
+
+        <div class="form-group">
+          <label id="lblTheme" class="form-label">Görünüş Mövzusu (Saf Qradientsiz)</label>
+          <div class="theme-grid" id="themeSelector">
+            <button type="button" data-theme="cyan" class="theme-pill-btn active">
+              <span class="theme-dot cyan"></span> Kosmik Sian
+            </button>
+            <button type="button" data-theme="amber" class="theme-pill-btn">
+              <span class="theme-dot amber"></span> Günəş Qızılı
+            </button>
+            <button type="button" data-theme="emerald" class="theme-pill-btn">
+              <span class="theme-dot emerald"></span> Şimal Parıltısı
+            </button>
+            <button type="button" data-theme="amethyst" class="theme-pill-btn">
+              <span class="theme-dot amethyst"></span> Kiber Ametist
+            </button>
+            <button type="button" data-theme="crimson" class="theme-pill-btn">
+              <span class="theme-dot crimson"></span> Mars Qırmızısı
+            </button>
+            <button type="button" data-theme="minimal" class="theme-pill-btn">
+              <span class="theme-dot minimal"></span> OLED Təmiz Qara
+            </button>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label id="lblCity" class="form-label" for="settingCityName">Hava Şəhəri</label>
+          <input type="text" id="settingCityName" class="form-input" placeholder="Məsələn: Baku, Istanbul, London...">
+        </div>
+
+        <div style="display: flex; flex-direction: column; gap: 0.75rem; padding-top: 0.5rem; border-top: 1px solid var(--border-color);">
+          <label class="toggle-row">
+            <span id="lbl24Hour">24 Saat Formatı</span>
+            <input type="checkbox" id="toggle24Hour" class="custom-switch">
+          </label>
+          <label class="toggle-row">
+            <span id="lblSeconds">Saniyələri Göstər</span>
+            <input type="checkbox" id="toggleSeconds" class="custom-switch">
+          </label>
+          <label class="toggle-row">
+            <span id="lblStarfield">Kosmik Ulduzlar Animasiyası</span>
+            <input type="checkbox" id="toggleStarfield" class="custom-switch" checked>
+          </label>
+          <label class="toggle-row">
+            <span id="lblWeather">Hava Vidcetini Göstər</span>
+            <input type="checkbox" id="toggleWeather" class="custom-switch">
+          </label>
+          <label class="toggle-row">
+            <span id="lblShortcuts">Qısayolları Göstər</span>
+            <input type="checkbox" id="toggleShortcuts" class="custom-switch">
+          </label>
+          <label class="toggle-row">
+            <span id="lblQuotes">Motivasiya Fikirlərini Göstər</span>
+            <input type="checkbox" id="toggleQuotes" class="custom-switch">
+          </label>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button id="saveSettingsBtn" class="btn-primary" style="width: 100%;" type="button">Yadda Saxla və Bağla</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="js/app.js"></script>
+</body>
+</html>
